@@ -1,98 +1,177 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+```markdown
+# 🚗 Car Pooling Tracking System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A backend service built with **NestJS** for real-time vehicle tracking. Simulates 10 vehicles with individual speeds and dynamic movement, synchronizing updates with a mock API.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🔧 Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- 🚘 Tracks 10 vehicles with simulated real-world motion
+- 🔁 Updates positions every 5 seconds based on individual speed
+- 🌐 Synchronizes with a remote mock API
+- 📡 RESTful API for fetching vehicle data
+- 📈 Real-time simulation of vehicle statuses: **Moving**, **Stopped**, or **Idle**
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 📂 Project Structure
+
 ```
 
-## Compile and run the project
+cars-pooling/
+├── dist/                # Compiled output
+├── node\_modules/        # Project dependencies
+├── src/                 # Application source code
+│   ├── app.controller.ts
+│   ├── app.module.ts
+│   ├── app.service.ts
+│   └── main.ts
+├── .gitignore
+├── .prettierrc
+├── eslint.config.mjs
+├── nest-cli.json
+├── package.json
+├── package-lock.json
+├── README.md
+├── tsconfig.build.json
+└── tsconfig.json
+
+````
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint       | Description                |
+|--------|----------------|----------------------------|
+| GET    | `/`            | Service health check       |
+| GET    | `/cars`        | Fetch all vehicles         |
+| GET    | `/cars/:id`    | Fetch vehicle by ID        |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 
 ```bash
-# development
-$ npm run start
+git clone https://github.com/mugemanebertin2001/cars-pooling.git
+cd cars-pooling
+````
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+### 2. Install Dependencies
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
+### 3. Setup Environment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Create a `.env` file with the following:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```env
+API_URL=https://68260a2e397e48c91314bda1.mockapi.io/api/v1/cars
+```
+
+---
+
+## 🧪 Running the Application
+
+### Development Mode
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Production Mode
 
-## Resources
+```bash
+npm run build
+npm run start:prod
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 🧠 Vehicle Movement Algorithm
 
-## Support
+Vehicles move according to a randomized, speed-based formula:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```ts
+const speedFactor = car.speed / 10;
+const distance = speedFactor * 0.001;
+const angle = Math.random() * Math.PI * 2;
+const latChange = Math.sin(angle) * distance;
+const lngChange = Math.cos(angle) * distance;
+```
 
-## Stay in touch
+This simulates realistic GPS movement in random directions based on speed.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## 🔁 Mock API Integration
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Vehicle positions are periodically synchronized with:
+
+```
+https://68260a2e397e48c91314bda1.mockapi.io/api/v1/cars
+```
+
+The service fetches existing car data on startup and updates it on every movement cycle.
+
+---
+
+## 📊 Monitoring & Logs
+
+You’ll see console logs for:
+
+* ✅ Successful API loading and syncing
+* 🛰️ Vehicle location updates every 5 seconds
+* ⚠️ API communication issues (if any)
+
+---
+
+## 🧩 Tech Stack
+
+* **[NestJS](https://nestjs.com/)** – Scalable Node.js framework
+* **[Axios](https://axios-http.com/)** – HTTP client for API requests
+* **[@nestjs/schedule](https://docs.nestjs.com/techniques/task-scheduling)** – Background tasks and intervals
+
+---
+
+## 🖼️ Demo (Optional)
+
+> You can insert screenshots or screen recordings of:
+>
+> * Console output
+> * API responses in Postman
+> * Diagram of vehicle movement logic
+
+---
+
+## 🛠️ Future Enhancements
+
+* [ ] WebSocket integration for real-time frontend updates
+* [ ] Map visualization of moving cars (e.g., using Leaflet or Google Maps)
+* [ ] Persistent storage with MongoDB or PostgreSQL
+* [ ] User authentication and car assignment
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to fork the repo and submit pull requests.
+
+1. Fork the repository
+2. Create a new branch: `git checkout -b feature-name`
+3. Make your changes
+4. Push and submit a PR
+
+---
+
+## 🧠 Author & Maintainer
+
+Developed by \[Mugemane Bertin]
+💼 \[[bertin.m2001@gmail.com](mailto:bertin.m2001@gmail)] 
+
+---
