@@ -9,7 +9,7 @@ export interface Car {
   latitude: number;
   longitude: number;
   speed: number;
-  status: string;
+  status: 'Moving' | 'Stopped' | 'Idle';
   timestamp?: string;
 }
 
@@ -17,9 +17,9 @@ export interface Car {
 export class AppService {
   private readonly logger = new Logger(AppService.name);
   private cars: Car[] = [];
-  private readonly apiUrl =
-    'https://68260a2e397e48c91314bda1.mockapi.io/api/v1/cars';
-  private readonly targetCarCount = 10;
+  private readonly apiUrl = 'https://68260a2e397e48c91314bda1.mockapi.io/api/v1/cars';
+  private readonly targetCarCount = 15;
+  private readonly carsPerStatus = 5; // 15 cars ÷ 3 statuses = 5 each
 
   constructor(private readonly httpService: HttpService) {
     this.initializeCars();
@@ -37,23 +37,63 @@ export class AppService {
       }
 
       this.logger.log(`Initialized with ${this.cars.length} cars`);
+      this.balanceCarStatuses(); // Ensure we have correct distribution
     } catch (error) {
       this.logger.error('Failed to fetch initial car data', error);
       await this.generateAllCars();
     }
   }
 
+  private balanceCarStatuses() {
+    const statusCounts = {
+      Moving: 0,
+      Stopped: 0,
+      Idle: 0
+    };
+
+    // Count current statuses
+    this.cars.forEach(car => statusCounts[car.status]++);
+
+    // Adjust statuses to meet our desired distribution
+    this.cars = this.cars.map(car => {
+      // If we have too many in this status, change it
+      if (statusCounts[car.status] > this.carsPerStatus) {
+        // Find a status that needs more cars
+        const neededStatus = Object.entries(statusCounts)
+          .find(([_, count]) => count < this.carsPerStatus)?.[0] as 'Moving' | 'Stopped' | 'Idle';
+
+        if (neededStatus) {
+          statusCounts[car.status]--;
+          statusCounts[neededStatus]++;
+          return {
+            ...car,
+            status: neededStatus,
+            speed: neededStatus === 'Moving' ? Math.floor(Math.random() * 60) + 30 : 0
+          };
+        }
+      }
+      return car;
+    });
+  }
+
   private async generateAdditionalCars() {
     const carsToGenerate = this.targetCarCount - this.cars.length;
     this.logger.log(`Generating ${carsToGenerate} additional cars`);
 
+    const statuses: ('Moving' | 'Stopped' | 'Idle')[] = ['Moving', 'Stopped', 'Idle'];
+    let statusIndex = 0;
+
     for (let i = 0; i < carsToGenerate; i++) {
+      // Distribute statuses evenly
+      const status = statuses[statusIndex % 3];
+      statusIndex++;
+
       const newCar: Omit<Car, 'id'> = {
         name: `Car ${String.fromCharCode(65 + ((this.cars.length + i) % 26))}`,
         latitude: -1.94 + Math.random() * 0.1,
         longitude: 30.05 + Math.random() * 0.1,
-        speed: Math.floor(Math.random() * 60) + 30,
-        status: ['Moving', 'Stopped', 'Idle'][Math.floor(Math.random() * 3)],
+        speed: status === 'Moving' ? Math.floor(Math.random() * 60) + 30 : 0,
+        status: status,
         timestamp: new Date().toISOString(),
       };
 
@@ -79,13 +119,19 @@ export class AppService {
     this.logger.log(`Generating all ${this.targetCarCount} cars`);
     this.cars = [];
 
+    const statuses: ('Moving' | 'Stopped' | 'Idle')[] = ['Moving', 'Stopped', 'Idle'];
+    let statusIndex = 0;
+
     for (let i = 0; i < this.targetCarCount; i++) {
+      // Distribute statuses evenly (5 each)
+      const status = statuses[Math.floor(i / this.carsPerStatus) % 3];
+
       const newCar: Omit<Car, 'id'> = {
         name: `Car ${String.fromCharCode(65 + (i % 26))}`,
         latitude: -1.94 + Math.random() * 0.1,
         longitude: 30.05 + Math.random() * 0.1,
-        speed: Math.floor(Math.random() * 60) + 30,
-        status: ['Moving', 'Stopped', 'Idle'][Math.floor(Math.random() * 3)],
+        speed: status === 'Moving' ? Math.floor(Math.random() * 60) + 30 : 0,
+        status: status,
         timestamp: new Date().toISOString(),
       };
 
@@ -118,41 +164,32 @@ export class AppService {
 
     this.cars = await Promise.all(
       this.cars.map(async (car) => {
+        // Only move cars that are in Moving state
         if (car.status !== 'Moving') {
           return car;
         }
 
-        const speedFactor = car.speed / 10; 
-        const distance = speedFactor * 0.001; 
-
-       
-        const angle = Math.random() * Math.PI * 2; 
+        const speedFactor = car.speed / 10;
+        const distance = speedFactor * 0.001;
+        const angle = Math.random() * Math.PI * 2;
         const latChange = Math.sin(angle) * distance;
         const lngChange = Math.cos(angle) * distance;
-
-        // Random chance to change status (10% chance)
-        const newStatus =
-          Math.random() > 0.9
-            ? ['Moving', 'Stopped', 'Idle'][Math.floor(Math.random() * 3)]
-            : car.status;
 
         const updatedCar = {
           ...car,
           latitude: parseFloat((car.latitude + latChange).toFixed(6)),
           longitude: parseFloat((car.longitude + lngChange).toFixed(6)),
-          status: newStatus,
           timestamp: new Date().toISOString(),
         };
 
         try {
-          // Update remote API
           await firstValueFrom(
             this.httpService.put(`${this.apiUrl}/${car.id}`, updatedCar),
           );
           return updatedCar;
         } catch (error) {
           this.logger.error(`Failed to update car ${car.id} in API`, error);
-          return updatedCar; // Return updated car even if API update fails
+          return updatedCar;
         }
       }),
     );
@@ -168,9 +205,14 @@ export class AppService {
     return this.cars.find((car) => car.id === id);
   }
 
+  getStatusDistribution(): { status: string; count: number }[] {
+    const counts = { Moving: 0, Stopped: 0, Idle: 0 };
+    this.cars.forEach(car => counts[car.status]++);
+    return Object.entries(counts).map(([status, count]) => ({ status, count }));
+  }
+
   getHello(): string {
-    return (
-      'Hello from Car Tracker! Now tracking ' + this.cars.length + ' vehicles.'
-    );
+    const distribution = this.getStatusDistribution().map(d => `${d.status}: ${d.count}`).join(', ');
+    return `Hello from Car Tracker! Tracking ${this.cars.length} vehicles (${distribution})`;
   }
 }
